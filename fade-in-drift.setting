@@ -1,0 +1,154 @@
+{
+	Tools = ordered() {
+		FadeInDrift = MacroOperator {
+			Inputs = ordered() {
+				MainInput1 = InstanceInput {
+					SourceOp = "FadeInDriftTransform",
+					Source = "Input",
+				},
+				Input1 = InstanceInput {
+					SourceOp = "FadeInDriftTransform",
+					Source = "Duration",
+					Name = "Duration (Frames)",
+					Page = "Controls",
+					Default = 24,
+				},
+				Input2 = InstanceInput {
+					SourceOp = "FadeInDriftTransform",
+					Source = "DriftX",
+					Name = "Drift X (Pixels)",
+					Page = "Controls",
+					Default = 80,
+				},
+				Input3 = InstanceInput {
+					SourceOp = "FadeInDriftTransform",
+					Source = "DriftY",
+					Name = "Drift Y (Pixels)",
+					Page = "Controls",
+					Default = 0,
+				},
+				Input4 = InstanceInput {
+					SourceOp = "FadeInDriftTransform",
+					Source = "StartOpacity",
+					Name = "Starting Opacity",
+					Page = "Controls",
+					Default = 0,
+				},
+				Input5 = InstanceInput {
+					SourceOp = "FadeInDriftTransform",
+					Source = "MotionBlur",
+					Name = "Motion Blur",
+					Page = "Controls",
+					Default = 0,
+				},
+			},
+			Outputs = {
+				MainOutput1 = InstanceOutput {
+					SourceOp = "FadeInDriftMerge",
+					Source = "Output",
+				}
+			},
+			ViewInfo = GroupInfo { Pos = { 0, 0 } },
+			Tools = ordered() {
+				FadeInDriftTransform = Transform {
+					CtrlWZoom = false,
+					Inputs = {
+						Duration = Input { Value = 24, },
+						DriftX = Input { Value = 80, },
+						DriftY = Input { Value = 0, },
+						StartOpacity = Input { Value = 0, },
+						Edges = Input { Value = 0, },
+						MotionBlur = Input { Value = 0, },
+						Quality = Input { Value = 4, },
+						ShutterAngle = Input { Value = 180, },
+						Center = Input {
+							Value = { 0.5, 0.5 },
+							Expression = "Point(0.5 - iif(time - ((comp and comp.RenderStart) or 0) >= FadeInDriftTransform.Duration, 0, iif(time - ((comp and comp.RenderStart) or 0) <= 0, 1, 1 - sin((time - ((comp and comp.RenderStart) or 0)) / max(1, FadeInDriftTransform.Duration) * 1.5707963268))) * (FadeInDriftTransform.DriftX / ((FadeInDriftTransform.Input and FadeInDriftTransform.Input.Width or 0) > 0 and FadeInDriftTransform.Input.Width or 1920)), 0.5 - iif(time - ((comp and comp.RenderStart) or 0) >= FadeInDriftTransform.Duration, 0, iif(time - ((comp and comp.RenderStart) or 0) <= 0, 1, 1 - sin((time - ((comp and comp.RenderStart) or 0)) / max(1, FadeInDriftTransform.Duration) * 1.5707963268))) * (FadeInDriftTransform.DriftY / ((FadeInDriftTransform.Input and FadeInDriftTransform.Input.Height or 0) > 0 and FadeInDriftTransform.Input.Height or 1080)))",
+						},
+					},
+					ViewInfo = OperatorInfo { Pos = { 165, 49.5 } },
+					UserControls = ordered() {
+						Duration = {
+							INP_MaxAllowed = 1000,
+							INP_MinAllowed = 1,
+							INP_Default = 24,
+							INP_MinScale = 1,
+							INP_MaxScale = 120,
+							INP_Integer = true,
+							LINKID_DataType = "Number",
+							ICS_ControlPage = "Controls",
+							INPID_InputControl = "SliderControl",
+							LINKS_Name = "Duration (Frames)",
+						},
+						DriftX = {
+							INP_MaxAllowed = 10000,
+							INP_MinAllowed = -10000,
+							INP_Default = 80,
+							INP_MinScale = -500,
+							INP_MaxScale = 500,
+							INP_Integer = false,
+							LINKID_DataType = "Number",
+							ICS_ControlPage = "Controls",
+							INPID_InputControl = "SliderControl",
+							LINKS_Name = "Drift X (Pixels)",
+						},
+						DriftY = {
+							INP_MaxAllowed = 10000,
+							INP_MinAllowed = -10000,
+							INP_Default = 0,
+							INP_MinScale = -500,
+							INP_MaxScale = 500,
+							INP_Integer = false,
+							LINKID_DataType = "Number",
+							ICS_ControlPage = "Controls",
+							INPID_InputControl = "SliderControl",
+							LINKS_Name = "Drift Y (Pixels)",
+						},
+						StartOpacity = {
+							INP_MaxAllowed = 1,
+							INP_MinAllowed = 0,
+							INP_Default = 0,
+							INP_MinScale = 0,
+							INP_MaxScale = 1,
+							INP_Integer = false,
+							LINKID_DataType = "Number",
+							ICS_ControlPage = "Controls",
+							INPID_InputControl = "SliderControl",
+							LINKS_Name = "Starting Opacity",
+						},
+					},
+				},
+				TransparentBG = Background {
+					CtrlWShown = false,
+					Inputs = {
+						Width = Input { Value = 1920, },
+						Height = Input { Value = 1080, },
+						UseFrameFormatSettings = Input { Value = 1, },
+						TopLeftAlpha = Input { Value = 0, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 330, 100 } },
+				},
+				FadeInDriftMerge = Merge {
+					CtrlWShown = false,
+					Inputs = {
+						Background = Input {
+							SourceOp = "TransparentBG",
+							Source = "Output",
+						},
+						Foreground = Input {
+							SourceOp = "FadeInDriftTransform",
+							Source = "Output",
+						},
+						PerformDepthMerge = Input { Value = 0, },
+						Blend = Input {
+							Value = 1,
+							Expression = "iif(time - ((comp and comp.RenderStart) or 0) >= FadeInDriftTransform.Duration, 1, iif(time - ((comp and comp.RenderStart) or 0) <= 0, FadeInDriftTransform.StartOpacity, FadeInDriftTransform.StartOpacity + (1 - FadeInDriftTransform.StartOpacity) * sin((time - ((comp and comp.RenderStart) or 0)) / max(1, FadeInDriftTransform.Duration) * 1.5707963268)))",
+						},
+					},
+					ViewInfo = OperatorInfo { Pos = { 330, 49.5 } },
+				},
+			},
+		}
+	},
+	ActiveTool = "FadeInDrift"
+}
